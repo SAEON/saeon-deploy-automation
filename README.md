@@ -82,7 +82,6 @@ Save the script in `/usr/local/bin` so that it is accessible system-wide. Then e
 
 ### What does this script do?:
 
-- Verifies user is a member of the `saeon-devops` group
 - Ensures the app folder exists under `/opt/apps/saeon/<dev|prod>/<app>`
 - Clones the app's public GitHub repo if missing
 - Pulls the latest changes from GitHub
