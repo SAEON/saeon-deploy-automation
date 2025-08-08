@@ -1,0 +1,41 @@
+name: SAEON App Deployment
+
+on:
+  push:
+    tags:
+      - 'prod-*'
+      - 'dev-*'
+      - 'staging-*'
+
+jobs:
+  deploy_saeon_app:
+    name: Trigger deployment on tag
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Extract environment and app name from tag
+        id: taginfo
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          echo "Detected tag: $TAG"
+
+          ENV=$(echo "$TAG" | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]')
+          APP=$(echo "$TAG" | cut -d'-' -f2-)
+
+          if [[ -z "$ENV" || -z "$APP" ]]; then
+            echo "Invalid tag format. Expected <env>-<app-name>"
+            echo "Example: git tag prod-agri-census"
+            echo "Example: git push origin prod-agri-census"
+            exit 1
+          fi
+
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "app=$APP" >> $GITHUB_OUTPUT
+
+      - name: Deploy via script 
+        run: |
+          chmod +x /usr/local/bin/deploy_saeon_apps.sh
+          /usr/local/bin/deploy_saeon_apps.sh ${{ steps.taginfo.outputs.env }} ${{ steps.taginfo.outputs.app }}
